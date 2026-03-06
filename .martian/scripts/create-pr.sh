@@ -62,6 +62,17 @@ for cmd in gh git; do
     fi
 done
 
+# Resolve project venv for tool execution
+source "$(dirname "$0")/resolve-venv.sh"
+
+if [ -n "$VENV_BIN" ]; then
+    RUFF="$VENV_BIN/ruff"
+    PYTEST="$VENV_BIN/pytest"
+else
+    RUFF="poetry run ruff"
+    PYTEST="poetry run pytest"
+fi
+
 log "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 log "${BLUE}Creating PR: ${TITLE}${NC}"
 log "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -83,17 +94,17 @@ log ""
 log "Step 2: Running linter + formatter check..."
 
 log "  Checking linter..."
-if ! poetry run ruff check . 2>&1; then
+if ! $RUFF check . 2>&1; then
     echo -e "${RED}LINTER FAILED - PR BLOCKED${NC}"
-    echo -e "${RED}Run: poetry run ruff check . --fix${NC}"
+    echo -e "${RED}Run: ruff check . --fix${NC}"
     exit 1
 fi
 log "${GREEN}  ✓ Linter passed${NC}"
 
 log "  Checking formatting..."
-if ! poetry run ruff format --check . 2>&1; then
+if ! $RUFF format --check . 2>&1; then
     echo -e "${RED}FORMATTER FAILED - PR BLOCKED${NC}"
-    echo -e "${RED}Run: poetry run ruff format .${NC}"
+    echo -e "${RED}Run: ruff format .${NC}"
     exit 1
 fi
 log "${GREEN}  ✓ Formatting correct${NC}"
@@ -102,7 +113,7 @@ log "${GREEN}  ✓ Formatting correct${NC}"
 log ""
 log "Step 3: Running full test suite..."
 
-if ! poetry run pytest 2>&1; then
+if ! $PYTEST 2>&1; then
     echo -e "${RED}TESTS FAILED - PR BLOCKED${NC}"
     exit 1
 fi
