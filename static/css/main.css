@@ -1,0 +1,245 @@
+/*
+ * main.css - Project Template
+ *
+ * Mobile-first responsive styles.
+ *
+ * Breakpoints:
+ *   - Base: Mobile (< 768px)
+ *   - Tablet: 768px+
+ *   - Desktop: 1024px+
+ */
+
+/* ==========================================================================
+   1. CSS CUSTOM PROPERTIES
+   ========================================================================== */
+
+:root {
+    /* Layout */
+    --content-max-width: 800px;
+    --content-padding: 1rem;
+
+    /* Spacing scale */
+    --spacing-xs: 0.25rem;   /* 4px */
+    --spacing-sm: 0.5rem;    /* 8px */
+    --spacing-md: 1rem;      /* 16px */
+    --spacing-lg: 1.5rem;    /* 24px */
+    --spacing-xl: 2rem;      /* 32px */
+    --spacing-2xl: 3rem;     /* 48px */
+
+    /* Touch targets (WCAG 2.5.8 recommends 44px min, we use 48px for comfort) */
+    --touch-target-min: 48px;
+}
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+    :root {
+        --content-padding: 1.5rem;
+    }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+    :root {
+        --content-padding: 2rem;
+    }
+}
+
+/* ==========================================================================
+   2. HTMX TRANSITIONS
+   Smooth fade transitions for HTMX content swaps.
+   ========================================================================== */
+
+[hx-swap], [hx-target], [hx-get], [hx-post] {
+    transition: opacity 150ms ease-in-out;
+}
+
+.htmx-swapping {
+    opacity: 0;
+}
+
+.htmx-added {
+    opacity: 0;
+}
+
+/* ==========================================================================
+   3. BASE STYLES (Mobile-first)
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+wa-button {
+    min-height: var(--touch-target-min);
+}
+
+/* ==========================================================================
+   4. HEADER & NAVIGATION
+   ========================================================================== */
+
+.site-header {
+    border-bottom: 1px solid var(--wa-color-surface-border);
+}
+
+.site-header-inner {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--spacing-md) var(--content-padding);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.site-logo {
+    font-weight: 700;
+    font-size: 1.125rem;
+    text-decoration: none;
+}
+
+/* Mobile: Hamburger toggle */
+.mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    color: inherit;
+}
+
+.mobile-menu-toggle wa-icon {
+    font-size: 1.5rem;
+}
+
+/* Desktop navigation - hidden on mobile */
+.site-nav {
+    display: none;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.site-nav a {
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.site-nav a[aria-current="page"] {
+    font-weight: 600;
+}
+
+.site-nav .logout-form {
+    display: contents;
+}
+
+/* Mobile menu panel - hidden by default */
+.mobile-menu {
+    display: none;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--content-padding);
+    background: var(--wa-color-surface-raised);
+    border-bottom: 1px solid var(--wa-color-surface-border);
+}
+
+.mobile-menu.open {
+    display: flex;
+}
+
+.mobile-menu a {
+    display: block;
+    padding: var(--spacing-sm) 0;
+    text-decoration: none;
+    font-size: 1rem;
+    min-height: var(--touch-target-min);
+    line-height: calc(var(--touch-target-min) - var(--spacing-md));
+}
+
+.mobile-menu a[aria-current="page"] {
+    font-weight: 600;
+}
+
+/* Tablet+: Hide mobile menu entirely */
+@media (min-width: 768px) {
+    .mobile-menu {
+        display: none !important;
+    }
+}
+
+/* Tablet+: Show nav, hide hamburger */
+@media (min-width: 768px) {
+    .mobile-menu-toggle {
+        display: none;
+    }
+
+    .site-nav {
+        display: flex;
+    }
+}
+
+/* ==========================================================================
+   5. MAIN CONTENT
+   ========================================================================== */
+
+.site-main {
+    flex: 1;
+}
+
+.site-main-inner {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--content-padding);
+}
+
+/* ==========================================================================
+   6. FOOTER
+   ========================================================================== */
+
+.site-footer {
+    border-top: 1px solid var(--wa-color-surface-border);
+    padding: var(--spacing-md) 0;
+}
+
+.site-footer-inner {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 var(--content-padding);
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   7. UTILITY CLASSES
+   ========================================================================== */
+
+/* Spacing utilities */
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mt-5 { margin-top: var(--spacing-xl); }
+
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+.mb-5 { margin-bottom: var(--spacing-xl); }
+
+/* Responsive visibility */
+.mobile-only { display: block; }
+.desktop-only { display: none; }
+
+@media (min-width: 768px) {
+    .mobile-only { display: none; }
+    .desktop-only { display: block; }
+}

@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="wa-cloak">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="{% block meta_description %}{% endblock %}">
+        <title>{% block title %}My Project{% endblock %}</title>
+        <!-- Critical CSS: Hide content until Web Awesome loads (prevents FOUC) -->
+        <style>.wa-cloak { visibility: hidden; }</style>
+        <!-- Main stylesheet -->
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <!-- Web Awesome Kit (includes theme + components) -->
+        <!-- TODO: Replace with your own Web Awesome kit URL from https://webawesome.com -->
+        <script src="https://kit.webawesome.com/YOUR_KIT_ID.js" crossorigin="anonymous"></script>
+        <!-- HTMX (vendored for reliability) -->
+        <script src="{% static 'js/vendor/htmx.min.js' %}"></script>
+        <script src="{% static 'js/vendor/htmx-response-targets.js' %}"></script>
+        <script src="{% static 'js/vendor/htmx-preload.js' %}"></script>
+        <!-- HTMX CSRF Configuration for Django -->
+        <script>
+        document.addEventListener('htmx:configRequest', function(event) {
+            const csrfToken = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1];
+            if (csrfToken) {
+                event.detail.headers['X-CSRFToken'] = csrfToken;
+            }
+        });
+
+        // Auto-toggle loading state on wa-button during HTMX requests
+        document.addEventListener('htmx:beforeRequest', function(event) {
+            const el = event.detail.elt;
+            if (el.tagName === 'WA-BUTTON') {
+                el.setAttribute('loading', '');
+            }
+        });
+
+        document.addEventListener('htmx:afterRequest', function(event) {
+            const el = event.detail.elt;
+            if (el.tagName === 'WA-BUTTON') {
+                el.removeAttribute('loading');
+            }
+            const status = event.detail.xhr?.status;
+            if (status >= 200 && status < 300) {
+                const errorContainer = document.getElementById('page-errors');
+                if (errorContainer) {
+                    errorContainer.innerHTML = '';
+                }
+            }
+        });
+
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('mobile-menu-toggle');
+            const menu = document.getElementById('mobile-menu');
+
+            if (toggle && menu) {
+                toggle.addEventListener('click', function() {
+                    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+                    toggle.setAttribute('aria-expanded', !isOpen);
+                    menu.classList.toggle('open', !isOpen);
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && menu.classList.contains('open')) {
+                        toggle.setAttribute('aria-expanded', 'false');
+                        menu.classList.remove('open');
+                        toggle.focus();
+                    }
+                });
+            }
+        });
+        </script>
+    </head>
+    <body hx-ext="response-targets,preload"
+          hx-target-error="#page-errors"
+          hx-swap-error="innerHTML"
+          preload="mouseover">
+        <header class="site-header">
+            <div class="site-header-inner">
+                <a href="/" class="site-logo">My Project</a>
+                <!-- Mobile: Hamburger menu button -->
+                <button id="mobile-menu-toggle"
+                        class="mobile-menu-toggle"
+                        aria-label="Menu"
+                        aria-expanded="false"
+                        aria-controls="mobile-menu">
+                    <wa-icon name="bars" label="Menu"></wa-icon>
+                </button>
+                <!-- Desktop: Horizontal navigation -->
+                <nav class="site-nav" aria-label="Main navigation">
+                    {% if user.is_authenticated %}
+                    <a href="/"{% if request.path == "/" %} aria-current="page"{% endif %}>Home</a>
+                    <form method="POST"
+                          action="{% url 'accounts:logout' %}"
+                          class="logout-form">
+                        {% csrf_token %}
+                        <wa-button type="submit" appearance="plain">Log out</wa-button>
+                    </form>
+                    {% else %}
+                    <a href="/admin/">Log In</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+        <!-- Mobile: Slide-down navigation menu -->
+        <nav id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation">
+            {% if user.is_authenticated %}
+            <a href="/"{% if request.path == "/" %} aria-current="page"{% endif %}>Home</a>
+            <form method="POST"
+                  action="{% url 'accounts:logout' %}"
+                  class="logout-form">
+                {% csrf_token %}
+                <wa-button type="submit" appearance="plain">Log out</wa-button>
+            </form>
+            {% else %}
+            <a href="/admin/">Log In</a>
+            {% endif %}
+        </nav>
+        <main class="site-main">
+            <div class="site-main-inner">
+                <div id="page-errors"></div>
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+        <footer class="site-footer">
+            <div class="site-footer-inner">
+                <p>&copy; My Project</p>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "lifecycle": {
+    "start-pr": ".martian/scripts/start-pr.sh",
+    "create-pr": ".martian/scripts/create-pr.sh"
+  }
+}
