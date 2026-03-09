@@ -221,6 +221,32 @@ Distributes items evenly across available space. Good for navs, headers, footers
 
 Web Awesome custom elements use Shadow DOM. Key testing patterns:
 
+### Viewport Resize Workaround (Playwright MCP)
+
+`browser_resize` can hang indefinitely on pages with `wa-carousel autoplay`
+or other continuously-animating WA components. The root cause: after every
+MCP tool call, the framework captures an accessibility snapshot by walking
+the entire DOM tree. Continuous animations (carousel slide transitions, CSS
+animations) mutate shadow DOM faster than the snapshot can stabilize.
+
+**Before calling `browser_resize`, pause animations:**
+
+```javascript
+// Run via browser_evaluate before any browser_resize call
+() => {
+  // Stop carousel autoplay
+  document.querySelectorAll('wa-carousel').forEach(c => c.autoplay = false);
+  // Kill all CSS animations and transitions
+  const style = document.createElement('style');
+  style.textContent = '*, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }';
+  document.head.appendChild(style);
+}
+```
+
+This only affects the Playwright MCP integration — normal Playwright E2E
+tests using `page.set_viewport_size()` are fine because they don't capture
+accessibility snapshots after every call.
+
 ### Waiting for WA to load
 
 The `PlaywrightE2ETestCase` base class auto-waits for WA by watching the

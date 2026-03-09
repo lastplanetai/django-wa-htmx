@@ -44,6 +44,28 @@ Use the Playwright MCP browser tools to visually verify your work:
    - Tablet: `width=768, height=1024`
    - Desktop: `width=1280, height=800`
 
+### Web Awesome Animation Workaround
+
+Pages with `wa-carousel autoplay` or other continuously-animating WA
+components will cause `browser_resize` (and sometimes `browser_snapshot`)
+to hang indefinitely. The Playwright MCP framework captures an accessibility
+snapshot after every tool call, and continuous DOM mutations prevent it from
+stabilizing.
+
+**Always run this before `browser_resize` on WA pages:**
+
+```javascript
+// browser_evaluate
+() => {
+  document.querySelectorAll('wa-carousel').forEach(c => c.autoplay = false);
+  const style = document.createElement('style');
+  style.textContent = '*, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }';
+  document.head.appendChild(style);
+}
+```
+
+This does NOT affect normal Playwright E2E tests — only the MCP integration.
+
 ### Tips
 
 - `browser_snapshot` is better than screenshots for understanding what's on
