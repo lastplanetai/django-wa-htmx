@@ -67,3 +67,7 @@ celerybeat.pid
 .DS_Store
 Thumbs.db
 *.pem
+
+# Martian runtime state (plans/ is checked in; project_state/ is transient)
+.martian/project_state/
+.claude/scheduled_tasks.lock
