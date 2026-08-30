@@ -108,16 +108,92 @@ tidy-first if the diff is trivial.
 - `plans/htmx-4-upgrade-and-agent-skills-adoption.md` — plan file
   committed to repo (was previously untracked from `update_plan`)
 
+## PR 2 — Install htmx 4 agent skills
+
+Vendored the 4 htmx 4 skill files from
+`bigskysoftware/htmx@v4.0.0/dist/skills/` into `.claude/skills/htmx-*/SKILL.md`:
+`htmx-guidance`, `htmx-debugging`, `htmx-extension-authoring`,
+`htmx-upgrade-from-htmx2`. Each ships with YAML frontmatter (`name`,
+`description`) that Claude Code's SDK reads for progressive-disclosure
+loading — descriptions load at session start, full body loads only when
+Claude invokes the skill.
+
+### The Martian-auto-load question
+
+The Claude Agent SDK discovers `.claude/skills/*/SKILL.md` automatically
+*when the SDK is configured with `setting_sources=["user", "project"]`*
+(or defaults, which include both). Martian is a custom harness built on
+that SDK — whether it passes those defaults through is not something we
+can observe from inside this repo. In this session's available-skills
+reminder, only harness/global skills appeared (`loop`, `schedule`,
+`claude-api`, `review`, ...); no direct evidence either way.
+
+Rather than probe with a throwaway PR, we chose **belt-and-suspenders**
+(Option A on the decision at PR-2 kickoff):
+
+1. Vendor into the standard `.claude/skills/` location — works with
+   vanilla Claude Code and matches the ADR's intent.
+2. Add an "Agent Skills" section to `martian.md` with one-line pointers
+   to each SKILL.md file, so if Martian doesn't auto-load them, the
+   descriptions are still surfaced via project instructions and the full
+   bodies are one `Read` away.
+
+**Verification hook for PR 3 / PR 4:** in the fresh session after this
+PR merges, check the system-reminder's available-skills list. If names
+like `htmx-guidance` appear → auto-load works, the `martian.md` pointers
+are redundant and can be trimmed in PR 4's README sweep. If they don't →
+the pointers are load-bearing and stay.
+
+### ADR 001 amendment slipped in as tidy-first
+
+Also amended `docs/adr/001-htmx-4-upgrade-and-agent-skills.md`:
+
+- Rewrote the PR-plan section to match reality (4 PRs, not 5 — the ADR
+  and htmx-4 upgrade shipped together as GitHub PR #5 because the
+  upgrade came in below the size guide).
+- Added a "Post-implementation notes (PR 1)" section documenting the
+  three deviations the journal called out (response-targets deletion,
+  `hx-ext=` removal, `event.detail.ctx.*` restructure) plus the
+  "scanner alone is not sufficient" lesson.
+
+The amendment is docs-only and independently reviewable — kept in this
+PR because both changes close out the "how did PR 1 actually land"
+loose ends and the combined diff is still small.
+
+### Files touched
+
+- `.claude/skills/htmx-guidance/SKILL.md` — new (745 lines, vendored)
+- `.claude/skills/htmx-debugging/SKILL.md` — new (212 lines, vendored)
+- `.claude/skills/htmx-extension-authoring/SKILL.md` — new (372 lines, vendored)
+- `.claude/skills/htmx-upgrade-from-htmx2/SKILL.md` — new (364 lines, vendored)
+- `martian.md` — added "Agent Skills" section with per-skill pointers
+- `docs/adr/001-htmx-4-upgrade-and-agent-skills.md` — PR-plan rewrite +
+  post-implementation notes section
+- `plans/htmx-4-upgrade-and-agent-skills-adoption.md` — corrected PR-2
+  checkbox (was auto-advanced to `[x] (#5)` after PR 1 merged;
+  actual state is `[-]` in-flight)
+
 ## What's Next
 
-**PR 2 — Install htmx 4 agent skills.** Vendor the 4 skill files from
-`bigskysoftware/htmx@v4.0.0` at `dist/skills/`:
+**PR 3 — Install Web Awesome agent skills.** Different installation
+story from htmx: WA ships skills as symlink-installable resources
+inside the `@awesome.me/webawesome` npm package. Plan per ADR 001:
 
-- `htmx-guidance.md` → `.claude/skills/htmx-guidance/SKILL.md`
-- `htmx-debugging.md` → `.claude/skills/htmx-debugging/SKILL.md`
-- `htmx-extension-authoring.md` → `.claude/skills/htmx-extension-authoring/SKILL.md`
-- `htmx-upgrade-from-htmx2.md` → `.claude/skills/htmx-upgrade-from-htmx2/SKILL.md`
+- Add a minimal `package.json` with `@awesome.me/webawesome` as a dev
+  dependency.
+- Run `npx skills add ./node_modules/@awesome.me/webawesome/dist/skills/webawesome`
+  and the same for `webawesome-design`. These create symlinks under
+  `.claude/skills/` so the skills auto-update with each `npm install`.
+- Delete `.martian/llms-webawesome.txt` (superseded by the WA skill;
+  keeping both invites drift).
+- Update `martian.md` — remove the WA-txt reference, add pointers to
+  the two WA skills the same way PR 2 did for htmx (only if PR 2's
+  auto-load verification comes back negative; otherwise the pointers
+  can be simpler).
+- Update `docs/web-awesome.md` to reference the skills.
 
-Reference them from `martian.md`. Consider slipping in a small ADR 001
-amendment (PR 1 deviations) as tidy-first if the two changes stay
-independently reviewable.
+The npm-dependency add is what makes PR 3 non-trivial: the repo doesn't
+have a `package.json` today (Node is used only transitively via `npx
+@playwright/mcp`). Consider whether the `package.json` should be
+committed with a lockfile, or if we should document the install as a
+manual step.

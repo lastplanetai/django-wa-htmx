@@ -16,6 +16,26 @@ This project includes lifecycle scripts in `.martian/config.json`:
 After `create-pr` completes successfully, call `reset_session` with notes
 about what was delivered.
 
+## Agent Skills
+
+Four htmx 4 agent skills live at `.claude/skills/htmx-*/SKILL.md`. If they
+appear in the session's available-skills reminder, invoke them via the
+`Skill` tool. If they don't (Martian may not auto-load project skills — see
+the ADR 001 post-implementation notes), reach for them by path with `Read`
+when the task matches the description:
+
+- `.claude/skills/htmx-guidance/SKILL.md` — writing HTML with htmx:
+  attributes, events, swap strategies, common UI patterns.
+- `.claude/skills/htmx-debugging/SKILL.md` — diagnosing htmx issues:
+  requests not firing, swaps not happening, events not triggering.
+- `.claude/skills/htmx-extension-authoring/SKILL.md` — creating, modifying,
+  or debugging htmx 4 extensions.
+- `.claude/skills/htmx-upgrade-from-htmx2/SKILL.md` — migrating a codebase
+  from htmx 2.x to 4.x.
+
+Vendored from `bigskysoftware/htmx@v4.0.0/dist/skills/` — re-fetch when
+htmx ships a new minor.
+
 ## Visual Review with Playwright MCP
 
 This project includes a Playwright MCP server (configured in `.martian/mcp.json`)
