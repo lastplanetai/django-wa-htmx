@@ -100,30 +100,64 @@ keeping both invites drift.
 
 ## PR Plan
 
-1. **This ADR** (PR 1) — records the decisions above.
-2. **PR 2 — Upgrade htmx to 4.0.0.** Re-vendor `htmx.min.js` @ 4.0.0 with
-   matching `response-targets` and `preload` extensions. Rename the three
-   event listeners in `base.html`. Remove body-level `hx-target-error`,
-   `hx-swap-error`, `preload="mouseover"`. Add a comment in `base.html`
-   documenting the per-element pattern. Run
-   `npx htmx.org@4.0.0 upgrade-check ./templates` and address any
-   findings. Verify existing tests still pass and the `htmx_errors`
-   middleware round-trip still works.
-3. **PR 3 — Install htmx 4 agent skills.** Vendor the 4 skill files
-   under `.claude/skills/htmx-guidance/SKILL.md`,
+The plan settled at four PRs, one smaller than the original five: PR 1
+(this ADR) and the htmx-4 upgrade shipped together as GitHub PR #5
+because the upgrade came in below the PR-size guide, and the ADR is
+what made the upgrade reviewable in the first place.
+
+1. **ADR + htmx 4 upgrade** (shipped as #5).
+2. **Install htmx 4 agent skills.** Vendor the 4 skill files under
+   `.claude/skills/htmx-guidance/SKILL.md`,
    `.claude/skills/htmx-debugging/SKILL.md`,
    `.claude/skills/htmx-extension-authoring/SKILL.md`,
-   `.claude/skills/htmx-upgrade-from-htmx2/SKILL.md`. Update `martian.md`
-   to reference them.
-4. **PR 4 — Install Web Awesome agent skills.** Add a minimal
-   `package.json` with `@awesome.me/webawesome` as a dev dependency plus
-   a documented one-liner (`npx skills add ./node_modules/@awesome.me/webawesome/dist/skills/webawesome`
-   and `webawesome-design`). Delete `.martian/llms-webawesome.txt`.
-   Update `martian.md` and `docs/web-awesome.md` to reference the skills
-   instead of the stale snapshot.
-5. **PR 5 (optional) — README sweep.** Add a "Skills" section to the
-   README; scrub any remaining references to old htmx events or the
-   deleted WA snapshot.
+   `.claude/skills/htmx-upgrade-from-htmx2/SKILL.md`. Reference them
+   from `martian.md`.
+3. **Install Web Awesome agent skills.** Add a minimal `package.json`
+   with `@awesome.me/webawesome` as a dev dependency plus the
+   documented `npx skills add` one-liner. Delete
+   `.martian/llms-webawesome.txt`. Update `martian.md` and
+   `docs/web-awesome.md` to reference the skills.
+4. **README sweep.** Add a "Skills" section to the README; scrub any
+   remaining references to old htmx events or the deleted WA snapshot.
+
+## Post-implementation notes (PR 1)
+
+The ADR warned that htmx 4 was two days old and one round of "docs said
+X, behavior was Y" was likely. That round happened. Three deviations
+worth recording:
+
+1. **`response-targets` as an extension no longer exists in htmx 4.**
+   The ADR said "re-vendor `response-targets` @ 4.x-compatible." That
+   build doesn't exist — the functionality moved into core as per-element
+   `hx-status:XXX="target:… swap:…"` attributes. The migration was
+   *delete the extension file and document the per-element pattern in
+   `base.html`*, not swap a version. End result actually lands closer
+   to this ADR's Option 3 intent (per-element, no inheritance) than the
+   ADR anticipated.
+
+2. **`hx-ext="..."` attribute is removed in htmx 4.** Extensions now
+   auto-activate from their `<script>` tag alone, so
+   `hx-ext="response-targets,preload"` on `<body>` was deleted outright
+   rather than edited.
+
+3. **`event.detail` structure changed significantly.** htmx 2 exposed
+   `event.detail.headers` and `event.detail.xhr`. htmx 4 wraps them
+   under `event.detail.ctx` (`ctx.request.headers`, `ctx.response.status`)
+   and drops XHR entirely (fetch under the hood). The CSRF handler and
+   after-request handler in `base.html` needed structural rewrites, not
+   just event-name renames.
+
+**Lesson for future htmx migrations:** `npx htmx.org@4.0.0 upgrade-check`
+is HTML-attribute-focused and caught only the three event renames plus
+`hx-ext=`. It did NOT flag `hx-target-error`, `hx-swap-error`,
+`preload=`, or any of the `event.detail.*` JS references. Run the
+scanner *and* read `htmx-upgrade-from-htmx2.md` end-to-end — the
+scanner catches mechanical renames, the skill catches structural
+changes. PR 2 makes that skill discoverable in this repo.
+
+Additional smaller fact: extension filenames changed from `htmx-*.js` to
+`hx-*.js` (e.g. `htmx-preload.js` → `hx-preload.js`), and the
+`preload="mouseover"` attribute is now `hx-preload="mouseover"`.
 
 ## Consequences
 
