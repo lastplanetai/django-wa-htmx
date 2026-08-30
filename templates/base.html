@@ -13,36 +13,36 @@
         <!-- Web Awesome Kit (includes theme + components) -->
         <!-- TODO: Replace with your own Web Awesome kit URL from https://webawesome.com -->
         <script src="https://kit.webawesome.com/YOUR_KIT_ID.js" crossorigin="anonymous"></script>
-        <!-- HTMX (vendored for reliability) -->
+        <!-- HTMX 4.0.0 (vendored for reliability) -->
+        <!-- Response-error targeting is native in htmx 4 (via hx-status:XXX); no response-targets extension. -->
         <script src="{% static 'js/vendor/htmx.min.js' %}"></script>
-        <script src="{% static 'js/vendor/htmx-response-targets.js' %}"></script>
-        <script src="{% static 'js/vendor/htmx-preload.js' %}"></script>
-        <!-- HTMX CSRF Configuration for Django -->
+        <script src="{% static 'js/vendor/hx-preload.js' %}"></script>
+        <!-- HTMX CSRF Configuration for Django (htmx 4: detail.ctx.request.headers) -->
         <script>
-        document.addEventListener('htmx:configRequest', function(event) {
+        document.addEventListener('htmx:config:request', function(event) {
             const csrfToken = document.cookie
                 .split('; ')
                 .find(row => row.startsWith('csrftoken='))
                 ?.split('=')[1];
             if (csrfToken) {
-                event.detail.headers['X-CSRFToken'] = csrfToken;
+                event.detail.ctx.request.headers['X-CSRFToken'] = csrfToken;
             }
         });
 
         // Auto-toggle loading state on wa-button during HTMX requests
-        document.addEventListener('htmx:beforeRequest', function(event) {
-            const el = event.detail.elt;
-            if (el.tagName === 'WA-BUTTON') {
+        document.addEventListener('htmx:before:request', function(event) {
+            const el = event.target;
+            if (el?.tagName === 'WA-BUTTON') {
                 el.setAttribute('loading', '');
             }
         });
 
-        document.addEventListener('htmx:afterRequest', function(event) {
-            const el = event.detail.elt;
-            if (el.tagName === 'WA-BUTTON') {
+        document.addEventListener('htmx:after:request', function(event) {
+            const el = event.target;
+            if (el?.tagName === 'WA-BUTTON') {
                 el.removeAttribute('loading');
             }
-            const status = event.detail.xhr?.status;
+            const status = event.detail.ctx?.response?.status;
             if (status >= 200 && status < 300) {
                 const errorContainer = document.getElementById('page-errors');
                 if (errorContainer) {
@@ -74,10 +74,7 @@
         });
         </script>
     </head>
-    <body hx-ext="response-targets,preload"
-          hx-target-error="#page-errors"
-          hx-swap-error="innerHTML"
-          preload="mouseover">
+    <body>
         <header class="site-header">
             <div class="site-header-inner">
                 <a href="/" class="site-logo">My Project</a>
@@ -121,6 +118,18 @@
         </nav>
         <main class="site-main">
             <div class="site-main-inner">
+                {% comment %}
+                    HTMX 4 error-targeting pattern (per-element, no inheritance):
+
+                        <wa-button hx-post="/api/thing"
+                                   hx-status:4xx="target:#page-errors swap:innerHTML"
+                                   hx-status:5xx="target:#page-errors swap:innerHTML">
+                            Do the thing
+                        </wa-button>
+
+                    Preload on hover (opt-in per element):
+                        <a href="/foo" hx-preload="mouseover">Foo</a>
+                {% endcomment %}
                 <div id="page-errors"></div>
                 {% block content %}{% endblock %}
             </div>
