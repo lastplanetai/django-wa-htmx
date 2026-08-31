@@ -2,6 +2,18 @@
 
 Quick reference for Web Awesome components and patterns used in this project.
 
+For comprehensive coverage of every WA component, layout utility, and
+design token, use the agent skills:
+
+- `.agents/skills/webawesome/SKILL.md` — component API reference
+  (auto-loaded; comprehensive).
+- `.agents/skills/webawesome-design/SKILL.md` — page-level design
+  guidance (`<wa-page>` layouts, theming, brand colors).
+
+This document is a curated subset for the components this project uses
+most, plus the Playwright testing and FOUC-prevention patterns specific
+to this template — things a general WA skill can't know about.
+
 ## Setup
 
 The kit script loads in `templates/base.html`:

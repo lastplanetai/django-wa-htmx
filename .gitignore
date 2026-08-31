@@ -71,3 +71,9 @@ Thumbs.db
 # Martian runtime state (plans/ is checked in; project_state/ is transient)
 .martian/project_state/
 .claude/scheduled_tasks.lock
+
+# Node (used only for tooling — Playwright MCP, Web Awesome skills sync)
+node_modules/
+
+# `skills` CLI lockfile — regenerated on each `npx skills add`, not our source of truth
+skills-lock.json
