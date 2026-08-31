@@ -18,23 +18,36 @@ about what was delivered.
 
 ## Agent Skills
 
-Four htmx 4 agent skills live at `.claude/skills/htmx-*/SKILL.md`. If they
-appear in the session's available-skills reminder, invoke them via the
-`Skill` tool. If they don't (Martian may not auto-load project skills — see
-the ADR 001 post-implementation notes), reach for them by path with `Read`
-when the task matches the description:
+Six agent skills ship with this template. Canonical source is
+`.agents/skills/<name>/SKILL.md`; `.claude/skills/<name>` is a symlink
+that Martian follows for auto-loading. Invoke via the `Skill` tool when
+they appear in the session's available-skills reminder; fall back to
+reading the path directly if they don't.
 
-- `.claude/skills/htmx-guidance/SKILL.md` — writing HTML with htmx:
+**htmx 4** — vendored from `bigskysoftware/htmx@v4.0.0/dist/skills/`.
+Re-fetch when htmx ships a new minor.
+
+- `.agents/skills/htmx-guidance/SKILL.md` — writing HTML with htmx:
   attributes, events, swap strategies, common UI patterns.
-- `.claude/skills/htmx-debugging/SKILL.md` — diagnosing htmx issues:
+- `.agents/skills/htmx-debugging/SKILL.md` — diagnosing htmx issues:
   requests not firing, swaps not happening, events not triggering.
-- `.claude/skills/htmx-extension-authoring/SKILL.md` — creating, modifying,
+- `.agents/skills/htmx-extension-authoring/SKILL.md` — creating, modifying,
   or debugging htmx 4 extensions.
-- `.claude/skills/htmx-upgrade-from-htmx2/SKILL.md` — migrating a codebase
+- `.agents/skills/htmx-upgrade-from-htmx2/SKILL.md` — migrating a codebase
   from htmx 2.x to 4.x.
 
-Vendored from `bigskysoftware/htmx@v4.0.0/dist/skills/` — re-fetch when
-htmx ships a new minor.
+**Web Awesome** — vendored from `@awesome.me/webawesome@3.12.0` via
+`npm install`. Refresh with `npm update @awesome.me/webawesome && npm run skills:sync`.
+
+- `.agents/skills/webawesome/SKILL.md` — component API reference
+  (buttons, inputs, dialogs, layouts, and 60+ others).
+- `.agents/skills/webawesome-design/SKILL.md` — page-level design
+  guidance: `<wa-page>` layouts, theming, brand colors, composition.
+
+**Cross-tool portability.** `.agents/skills/` follows the emerging
+open-agent-skills convention. Downstream users on other AI tools
+(Cursor, Zed, Amp, Cline, etc.) can generate tool-specific pointers with
+`npx skills add ./.agents/skills/<skill-name> -a <agent-name>`.
 
 ## Visual Review with Playwright MCP
 
@@ -98,10 +111,13 @@ This does NOT affect normal Playwright E2E tests — only the MCP integration.
 
 This project uses Web Awesome Pro for UI components. Key references:
 
-- **Component docs**: `docs/web-awesome.md` — quick reference for components,
-  layout utilities, and Playwright testing patterns
-- **LLMs context**: `.martian/llms-webawesome.txt` — comprehensive Web Awesome
-  documentation for AI context (3000+ lines)
+- **Agent skills**: `.agents/skills/webawesome/SKILL.md` (component APIs)
+  and `.agents/skills/webawesome-design/SKILL.md` (page-level design
+  guidance) — auto-loaded via `.claude/skills/` symlinks. See "Agent
+  Skills" section above.
+- **Component quick-ref**: `docs/web-awesome.md` — hand-authored notes on
+  the components we use most, plus Playwright testing patterns and the
+  `wa-cloak` FOUC setup specific to this template.
 
 ### Key Patterns
 

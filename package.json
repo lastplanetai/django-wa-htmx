@@ -1,0 +1,12 @@
+{
+  "name": "django-wa-htmx",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Django + Web Awesome + HTMX template. Node is used only for tooling (Playwright MCP, Web Awesome agent skills).",
+  "devDependencies": {
+    "@awesome.me/webawesome": "3.12.0"
+  },
+  "scripts": {
+    "skills:sync": "rm -rf .agents/skills/webawesome .agents/skills/webawesome-design && cp -R node_modules/@awesome.me/webawesome/dist/skills/webawesome .agents/skills/ && cp -R node_modules/@awesome.me/webawesome/dist/skills/webawesome-design .agents/skills/"
+  }
+}
