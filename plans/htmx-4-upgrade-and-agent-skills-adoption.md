@@ -7,4 +7,4 @@ Upgrade htmx to 4.0.0 with idiomatic per-element attribute pattern, and replace 
 - [x] PR 1: Upgrade htmx to 4.0.0 (#5)
 - [x] PR 2: Install htmx 4 agent skills (#6)
 - [x] PR 3: Install Web Awesome agent skills (#7)
-- [-] PR 4: README sweep
+- [x] PR 4: README sweep (#8)
