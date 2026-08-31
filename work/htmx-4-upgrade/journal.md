@@ -283,18 +283,77 @@ call doesn't repeat the mistake — the full agent list is in
 - `docs/web-awesome.md` — header pointer added
 - `plans/htmx-4-upgrade-and-agent-skills-adoption.md` — PR-3 advance
 
+## PR 4 — README sweep
+
+Brought the top-level `README.md` up to date with what PRs 1-3 shipped.
+The sweep turned out to be entirely additive — a pre-flight grep
+confirmed the README had no stale references to
+`.martian/llms-webawesome.txt`, pre-htmx-4 event names, or the deleted
+extension files. (Lingering matches for those strings all live in this
+journal, ADR 001, and the upstream-vendored `htmx-upgrade-from-htmx2`
+skill file — correct as historical / upstream artifacts.)
+
+### Structure of the edits
+
+Four surfaces touched, in order of impact:
+
+1. **New `## Agent Skills` section** — the meat of the PR. Placed
+   between "Web Awesome Setup" and "Project Structure". Reads top-to-
+   bottom: what the six skills are and what each does → where they
+   live (`.agents/skills/` canonical, `.claude/skills/` symlinks) →
+   cross-tool `npx skills add` workflow → upgrade path
+   (`npm update … && npm run skills:sync && git diff`). The
+   "canonical source" subsection is the load-bearing part: it tells
+   downstream users to edit `.agents/skills/`, not `.claude/skills/`.
+
+2. **Stack list** — bumped htmx to "htmx 4"; added an "Agent skills"
+   entry with an anchor link into the new section, so the six skills
+   are visible at the top of the README, not buried mid-page.
+
+3. **Project Structure diagram** — added `.agents/skills/` with all
+   six skills named individually (readers can see the vocabulary
+   without jumping to the new section), `.claude/skills/` called out
+   as symlinks, and `package.json` (the new npm-tooling entry point).
+   Also picked up `.martian/mcp.json` (Playwright MCP), which the
+   diagram had never listed.
+
+4. **Web Awesome Setup pointer** — one line under the kit-URL
+   instructions telling readers Claude can help with WA markup on
+   demand via the two WA skills.
+
+### The "npm install" question
+
+Considered adding an `npm install` step to Quick Start, but decided
+against it. The skills already live in `.agents/skills/` (vendored),
+so Claude Code users get them at git-checkout time — no npm needed.
+`npm install` is only required if the user wants to (a) run Playwright
+MCP or (b) upgrade WA via `npm run skills:sync`. Both are optional
+paths, so calling `npm install` out as a required onboarding step
+would misrepresent what the template needs. The "Keeping skills
+current" subsection is where npm actually shows up, and that's the
+right place for it.
+
+### Also carried in this PR
+
+Plan-file advancement (`[x] PR 3 (#7)`, `[-] PR 4`) that was left
+uncommitted on `main` after PR #7's `reset_session` — bundled here
+per the "never leave uncommitted changes on the primary branch"
+convention.
+
+### Note on merge authorization
+
+The user profile forbids interpreting a generic "continue" as merge
+authorization. This project's `.martian/scripts/create-pr.sh`
+auto-merges (line 188: `gh pr merge --squash --delete-branch`), so
+shipping this PR required an explicit `present_options` gate. The
+user picked option A (run the script as-is, accept the auto-merge)
+— recorded here so future sessions know the pattern: when the
+project's create-pr script bundles merge, use `present_options`
+rather than assume "continue" covers it.
+
 ## What's Next
 
-**PR 4 — README sweep.** Now that all six skills auto-load reliably
-through the `.claude/skills/` symlinks, the README should:
-
-- Introduce the six agent skills (link to `.agents/skills/` as
-  canonical source, mention the `npx skills add` cross-tool workflow).
-- Explain the two-command onboarding for Claude Code users (`npm install` and you're done) vs. other-tool users (`npm install && npx skills add …`).
-- Scrub any remaining references to `.martian/llms-webawesome.txt`
-  (deleted this PR) or old htmx 2.x events.
-
-The `martian.md` "belt-and-suspenders" pointers from PR #6 remain
-untouched — the user's call was to keep them as cheap insurance
-against a hypothetical future Martian version that stops auto-loading
-project skills.
+Plan complete after this PR ships. The htmx-4-upgrade-and-agent-
+skills-adoption arc is done: htmx 4 upgrade (PR 1), htmx skills
+vendored (PR 2), Web Awesome skills adopted with the cross-tool
+`.agents/skills/` reorg (PR 3), README brought current (PR 4).
